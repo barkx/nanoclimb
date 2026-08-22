@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nano Climb — tick list</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400;12..96,75..100,600;12..96,75..100,800&family=Inter+Tight:wght@400;500;600&family=Jost:wght@200;300;400&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --chalk:#ECEFE8;
+    --card:#F8F9F5;
+    --ink:#16211F;
+    --ink-soft:#5A6A64;
+    --rope:#1F4FD8;
+    --rope-dim:#e5eafc;
+    --flag:#F0B429;
+    --send:#2E7D5B;
+    --line:rgba(22,33,31,.13);
+    --line-soft:rgba(22,33,31,.07);
+    --top:60px;
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body.locked{overflow:hidden}
+  body{
+    background:var(--chalk);
+    color:var(--ink);
+    font-family:"Inter Tight",system-ui,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:"Bricolage Grotesque","Inter Tight",sans-serif;margin:0;letter-spacing:-.02em;font-weight:800;line-height:1.05}
+  button{font:inherit;color:inherit}
+  :focus-visible{outline:2.5px solid var(--rope);outline-offset:2px;border-radius:6px}
+  .mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+
+  /* ---------- login ---------- */
+  .gate{
+    position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;
+    background:var(--chalk);overflow:hidden;
+  }
+  .gate.done{display:none}
+  .gate-topo{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .gate-card{
+    position:relative;width:min(400px,100%);
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:38px 32px 32px;box-shadow:0 26px 60px rgba(16,24,22,.14);
+    animation:rise .3s ease;
+  }
+  .gate-wm{margin:0 auto 18px}
+  .gate-wm .wm-top{font-size:38px}
+  .gate-sub{color:var(--ink-soft);font-size:14px;margin:0;text-align:center}
+  .gate-form{display:grid;gap:14px;margin-top:28px}
+  .gate-form .field{display:grid;gap:6px}
+  .gate-form label{margin:0}
+  .gate-form input{height:46px;padding:0 12px;border-radius:10px;font-size:15px;letter-spacing:.01em;background:#fff;color:var(--ink)}
+  .gate-form input::placeholder{color:rgba(90,106,100,.6)}
+  .gate-form input:-webkit-autofill,
+  .gate-form input:-webkit-autofill:hover,
+  .gate-form input:-webkit-autofill:focus{
+    -webkit-text-fill-color:var(--ink);
+    -webkit-box-shadow:0 0 0 40px #fff inset;
+    caret-color:var(--ink);
+  }
+  .gate-btn{height:46px;padding:0;justify-content:center;width:100%;border-radius:10px;font-size:15px}
+  .gate .err{text-align:center;min-height:0;margin:-2px 0}
+
+  /* ---------- shell ---------- */
+  .topbar{
+    position:sticky;top:0;z-index:40;height:var(--top);
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:0 22px;border-bottom:1px solid var(--line);
+    background:rgba(236,239,232,.9);backdrop-filter:blur(10px);
+  }
+  .brand{display:flex;align-items:center;text-decoration:none;color:var(--ink)}
+  .wm{display:flex;flex-direction:column;align-items:center;line-height:1;color:var(--ink)}
+  .wm-top{
+    font-family:"Jost",sans-serif;font-weight:200;font-size:23px;
+    letter-spacing:.30em;text-indent:.30em;display:flex;align-items:flex-end;
+  }
+  .wm-a{width:.72em;height:.94em;margin:0 .30em 0 0;display:block}
+  .wm-o{font-weight:200}
+
+  .shell{min-height:calc(100vh - var(--top))}
+
+  main{min-width:0;padding:0 0 80px}
+
+  /* ---------- bits ---------- */
+  .crumb{font-size:12px;color:var(--ink-soft);letter-spacing:.02em}
+  .spacer{flex:1}
+  .btn{
+    border:1px solid var(--line);background:var(--card);border-radius:10px;
+    padding:9px 14px;cursor:pointer;font-weight:600;font-size:14px;
+    display:inline-flex;align-items:center;gap:8px;transition:transform .12s,background .15s,border-color .15s;
+  }
+  .btn:hover{background:#fff;border-color:rgba(22,33,31,.25)}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--rope);border-color:var(--rope);color:#fff}
+  .btn-primary:hover{background:#1A44BC;border-color:#1A44BC}
+  .btn-ghost{background:transparent}
+  .btn-sm{padding:7px 12px;font-size:13px}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;overflow:hidden;padding:34px;border-bottom:1px solid var(--line)}
+  .hero svg.topo{position:absolute;inset:-10% -5%;width:110%;height:130%;opacity:.5;pointer-events:none}
+  .hero-in{position:relative;display:flex;gap:40px;flex-wrap:wrap;align-items:flex-end;justify-content:space-between}
+  .eyebrow{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin-bottom:12px}
+  .hero-copy{max-width:min(100%,34ch)}
+  .hero h1{font-size:clamp(30px,4.2vw,46px);text-wrap:balance}
+  .hero h1 em{font-style:normal;color:var(--rope)}
+  .hero p{color:var(--ink-soft);max-width:46ch;margin:14px 0 0;font-size:15.5px}
+
+  .ceiling{
+    background:var(--ink);color:#EFF2EC;border-radius:var(--r);padding:18px 22px;min-width:340px;
+  }
+  .ceiling .eyebrow{color:rgba(239,242,236,.5);margin-bottom:14px}
+  .bests{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .best{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .best + .best{border-left:1px solid rgba(239,242,236,.16);padding-left:20px}
+  .best .d{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(239,242,236,.55);font-weight:600}
+  .best .g{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:38px;line-height:1;color:var(--flag);letter-spacing:-.04em}
+  .best .r{font-size:12.5px;color:rgba(239,242,236,.75);line-height:1.35}
+
+  /* ---------- layout blocks ---------- */
+  .wrap{padding:26px 34px;display:flex;flex-direction:column;gap:26px}
+  .view-head{padding-top:14px}
+  .view-head h1{font-size:clamp(28px,3.4vw,40px)}
+  .view-head p{margin:8px 0 0;color:var(--ink-soft);max-width:46ch}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+  .stat .k{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .stat .v{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:30px;letter-spacing:-.03em;margin-top:8px}
+  .stat .n{font-size:12.5px;color:var(--ink-soft);margin-top:2px}
+  .stat .v small{font-size:14px;font-weight:600;color:var(--ink-soft);letter-spacing:0}
+
+  .cols{display:grid;grid-template-columns:1.15fr .85fr;gap:22px;align-items:start}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .panel-head{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line-soft)}
+  .panel-head h3{font-size:15px}
+  .panel-head .hint{font-size:12px;color:var(--ink-soft)}
+  .panel-body{padding:18px}
+
+  /* ---------- grade pyramid (signature) ---------- */
+  .pyr{display:flex;flex-direction:column-reverse;gap:6px}
+  .pyr-row{display:grid;grid-template-columns:44px 1fr 34px;align-items:center;gap:12px}
+  .pyr-grade{font-family:"JetBrains Mono",monospace;font-weight:800;font-size:13px;text-align:right;color:var(--ink)}
+  .pyr-track{display:flex;justify-content:center;gap:4px;min-height:22px}
+  .tick{width:26px;height:22px;border-radius:5px;background:var(--rope);opacity:.9}
+  .tick.ghost{background:transparent;border:1.5px dashed rgba(22,33,31,.22)}
+  .tick.proj{background:repeating-linear-gradient(45deg,var(--flag),var(--flag) 4px,#f7d98a 4px,#f7d98a 8px)}
+  .pyr-count{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--ink-soft)}
+  .pyr-empty{color:var(--ink-soft);font-size:13px;text-align:center;padding:20px 0}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)}
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block;vertical-align:-2px;margin-right:6px}
+  .legend i.send{background:var(--rope)}
+  .legend i.proj{background:repeating-linear-gradient(45deg,var(--flag),var(--flag) 4px,#f7d98a 4px,#f7d98a 8px)}
+  .legend i.gap{border:1.5px dashed rgba(22,33,31,.28)}
+
+  .seg{display:inline-flex;background:rgba(22,33,31,.06);border-radius:9px;padding:3px}
+  .seg button{border:0;background:none;padding:5px 12px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink-soft)}
+  .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(22,33,31,.12)}
+
+  /* ---------- feed ---------- */
+  .feed{display:flex;flex-direction:column}
+  .entry{display:grid;grid-template-columns:62px 1fr auto;gap:14px;padding:13px 18px;border-bottom:1px solid var(--line-soft);align-items:center}
+  .entry:last-child{border-bottom:0}
+  .entry:hover{background:#fff}
+  .gbadge{
+    font-family:"JetBrains Mono",monospace;font-weight:800;font-size:13px;
+    background:var(--ink);color:var(--flag);border-radius:9px;padding:9px 4px;text-align:center;letter-spacing:-.02em;
+  }
+  .gbadge.attempt{background:var(--rope-dim);color:var(--rope)}
+  .entry .rt{font-weight:600}
+  .entry .meta{font-size:12.5px;color:var(--ink-soft);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .pill{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:20px;border:1px solid var(--line)}
+  .pill.onsight{color:var(--send);border-color:rgba(46,125,91,.35);background:rgba(46,125,91,.09)}
+  .pill.flash{color:#8A5A00;border-color:rgba(240,180,41,.5);background:rgba(240,180,41,.16)}
+  .pill.redpoint{color:var(--rope);border-color:rgba(31,79,216,.3);background:var(--rope-dim)}
+  .pill.project{color:var(--ink-soft);background:rgba(22,33,31,.05)}
+  .when{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--ink-soft);white-space:nowrap}
+
+  /* ---------- locations ---------- */
+  .more-wrap{display:flex;justify-content:center}
+  .more-btn{padding:10px 20px}
+  .locgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .loc{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px;transition:border-color .15s,transform .15s}
+  .loc:hover{border-color:rgba(22,33,31,.28);transform:translateY(-2px)}
+  .loc .type{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--ink-soft);display:flex;align-items:center;gap:7px}
+  .loc .type b{width:8px;height:8px;border-radius:2px;background:var(--rope);display:inline-block}
+  .loc.outdoor .type b{background:var(--send)}
+  .loc h4{font-size:19px}
+  .loc .sub{font-size:13px;color:var(--ink-soft);margin-top:3px}
+  .loc .nums{display:flex;gap:22px;padding:12px 0;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+  .loc .nums div{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .loc .nums b{display:block;font-family:"JetBrains Mono",monospace;font-size:20px;letter-spacing:-.02em;color:var(--ink);font-weight:800;margin-top:3px}
+  .loc .acts{display:flex;gap:8px;margin-top:auto}
+
+  /* ---------- table ---------- */
+  .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  select,input[type=text],input[type=date],input[type=number],textarea{
+    font:inherit;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 11px;color:var(--ink);width:100%;
+  }
+  select:hover,input:hover{border-color:rgba(22,33,31,.25)}
+  .filters select{width:auto;min-width:140px}
+  .tablewrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:520px}
+  th{text-align:left;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);padding:12px 18px;border-bottom:1px solid var(--line);font-weight:600}
+  td{padding:12px 18px;border-bottom:1px solid var(--line-soft);font-size:14px}
+  tbody tr:hover{background:#fff}
+  td .g{font-family:"JetBrains Mono",monospace;font-weight:800}
+  .empty{padding:46px 20px;text-align:center;color:var(--ink-soft);grid-column:1/-1}
+  .empty h4{font-size:17px;color:var(--ink);margin-bottom:6px}
+  .empty p{margin:0}
+
+  /* ---------- modal ---------- */
+  .veil{position:fixed;inset:0;background:rgba(20,28,26,.5);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:20px;z-index:60}
+  .veil.open{display:flex}
+  .modal{background:var(--chalk);border-radius:18px;width:min(560px,100%);max-height:92vh;overflow:auto;box-shadow:0 26px 60px rgba(16,24,22,.34);animation:rise .22s ease}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}}
+  .modal header{display:flex;align-items:flex-start;gap:14px;padding:22px 24px 0}
+  .modal header h3{font-size:22px}
+  .modal header p{margin:5px 0 0;font-size:13px;color:var(--ink-soft)}
+  .x{margin-left:auto;border:0;background:rgba(22,33,31,.07);width:32px;height:32px;border-radius:9px;cursor:pointer;font-size:17px;line-height:1}
+  .form{padding:20px 24px 24px;display:grid;gap:14px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  label{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin-bottom:6px}
+  .label-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .addloc{
+    display:inline-flex;align-items:center;gap:6px;margin-bottom:6px;
+    border:1px solid rgba(31,79,216,.3);background:var(--rope-dim);color:var(--rope);
+    padding:4px 11px 4px 8px;border-radius:20px;cursor:pointer;
+    font-size:12.5px;font-weight:600;line-height:1.4;
+    transition:background .15s,border-color .15s,color .15s,transform .12s;
+  }
+  .addloc svg{width:13px;height:13px;flex:none}
+  .addloc:hover{background:var(--rope);border-color:var(--rope);color:#fff}
+  .addloc:active{transform:translateY(1px)}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:7px 13px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink-soft)}
+  .chip.on{background:var(--ink);border-color:var(--ink);color:#F3F5EF}
+  .modal footer{display:flex;gap:10px;justify-content:flex-end;padding:0 24px 24px}
+  .err{color:#B02E23;font-size:12.5px;min-height:16px}
+
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);z-index:90;
+    background:var(--ink);color:#F3F5EF;padding:12px 18px;border-radius:10px;font-size:14px;font-weight:500;
+    display:flex;gap:10px;align-items:center;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .toast b{color:var(--flag);font-family:"JetBrains Mono",monospace}
+
+  .view{display:block;scroll-margin-top:var(--top)}
+  .view + .view{border-top:1px solid var(--line)}
+
+  @media (max-width:900px){
+    .topbar{padding:0 16px}
+    .hero{padding-top:22px}
+    .ceiling{min-width:0;width:100%}
+    .cols{grid-template-columns:1fr}
+    .stats{grid-template-columns:1fr 1fr}
+    .hero,.wrap{padding-left:18px;padding-right:18px}
+    .row{grid-template-columns:1fr}
+    .best .g{font-size:32px}
+    .hero-in{gap:26px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+  <svg class="gate-topo" viewBox="0 0 800 600" preserveAspectRatio="none" aria-hidden="true">
+    <g fill="none" stroke="#16211F" stroke-opacity=".13" stroke-width="1">
+      <path d="M-20 520C120 480 180 538 300 502S520 420 640 456s160 40 200 20"/>
+      <path d="M-20 470C120 430 190 488 300 452S520 370 640 406s160 40 200 20"/>
+      <path d="M-20 420C120 380 200 438 300 402S520 320 640 356s160 40 200 20"/>
+      <path d="M-20 370C130 332 210 388 300 352S520 270 640 306s160 40 200 20"/>
+      <path d="M-20 320C140 284 220 338 300 302S520 220 640 256s160 40 200 20"/>
+      <path d="M-20 270C150 236 230 288 300 252S520 170 640 206s160 40 200 20"/>
+      <path d="M-20 220C160 188 240 238 300 202S520 120 640 156s160 40 200 20"/>
+      <path d="M-20 170C170 140 250 188 300 152S520 70 640 106s160 40 200 20"/>
+    </g>
+  </svg>
+
+  <div class="gate-card">
+    <div class="wm gate-wm">
+      <span class="wm-top">N<svg class="wm-a" viewBox="0 0 20 26" aria-hidden="true"><path d="M1.4 25 10 2l8.6 23" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>N<span class="wm-o">O</span></span>
+    </div>
+    <p class="gate-sub">Gyms, crags, grades, projects — all in one tick list.</p>
+
+    <div class="gate-form">
+      <div class="field">
+        <label for="gUser">Name</label>
+        <input type="text" id="gUser" autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="gPass">Password</label>
+        <input type="text" id="gPass" class="masked" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="err" id="gErr"></div>
+      <button class="btn btn-primary gate-btn" id="gGo">Sign in</button>
+    </div>
+  </div>
+</div>
+
+<header class="topbar">
+  <a class="brand" href="#" aria-label="Nano Climb">
+    <span class="wm">
+      <span class="wm-top">N<svg class="wm-a" viewBox="0 0 20 26" aria-hidden="true"><path d="M1.4 25 10 2l8.6 23" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>N<span class="wm-o">O</span></span>
+    </span>
+  </a>
+  <button class="btn btn-primary" id="btnAddClimb">Log a climb</button>
+</header>
+
+<div class="shell">
+  <main>
+    <!-- ============ DASHBOARD ============ -->
+    <section class="view" id="view-dash">
+      <div class="hero">
+        <svg class="topo" viewBox="0 0 800 300" preserveAspectRatio="none" aria-hidden="true">
+          <g fill="none" stroke="#16211F" stroke-opacity=".12" stroke-width="1">
+            <path d="M-20 250C120 210 180 268 300 232S520 150 640 186s160 40 200 20"/>
+            <path d="M-20 222C120 182 190 240 300 204S520 122 640 158s160 40 200 20"/>
+            <path d="M-20 194C120 154 200 212 300 176S520 94 640 130s160 40 200 20"/>
+            <path d="M-20 166C130 128 210 184 300 148S520 66 640 102s160 40 200 20"/>
+            <path d="M-20 138C140 102 220 156 300 120S520 38 640 74s160 40 200 20"/>
+            <path d="M-20 110C150 76 230 128 300 92S520 10 640 46s160 40 200 20"/>
+            <path d="M-20 82C160 50 240 100 300 64S520-18 640 18s160 40 200 20"/>
+          </g>
+        </svg>
+        <div class="hero-in">
+          <div class="hero-copy">
+            <div class="eyebrow" id="heroEyebrow">Marcel · this season</div>
+            <h1 id="heroLine">Loading your season…</h1>
+            <p id="heroSub"></p>
+          </div>
+          <div class="ceiling">
+            <div class="eyebrow">Hardest sends so far</div>
+            <div class="bests">
+              <div class="best" id="bestSport">
+                <span class="d">Sport</span>
+                <span class="g">—</span>
+                <span class="r">—</span>
+              </div>
+              <div class="best" id="bestBoulder">
+                <span class="d">Boulder</span>
+                <span class="g">—</span>
+                <span class="r">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wrap">
+        <div class="stats">
+          <div class="stat"><div class="k">Sessions</div><div class="v" id="sSessions">0</div><div class="n">days on the wall</div></div>
+          <div class="stat"><div class="k">Routes sent</div><div class="v" id="sSends">0</div><div class="n" id="sSendsNote">—</div></div>
+          <div class="stat"><div class="k">Onsight rate</div><div class="v" id="sOnsight">0<small>%</small></div><div class="n">first try, no beta</div></div>
+          <div class="stat"><div class="k">Open projects</div><div class="v" id="sProjects">0</div><div class="n" id="sProjNote">—</div></div>
+        </div>
+
+        <div class="cols">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Grade pyramid</h3>
+              <span class="hint">one block = one send</span>
+              <div class="spacer"></div>
+              <div class="seg" id="discSeg">
+                <button class="on" data-disc="boulder">Boulder</button>
+                <button data-disc="sport">Sport</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="pyr" id="pyramid"></div>
+              <div class="legend">
+                <span><i class="send"></i>Send</span>
+                <span><i class="proj"></i>Open project</span>
+                <span><i class="gap"></i>Gap to fill</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Recent climbs</h3>
+              <div class="spacer"></div>
+              <button class="btn btn-sm btn-ghost" data-goto="ticks">All climbs</button>
+            </div>
+            <div class="feed" id="feed"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============ LOCATIONS ============ -->
+    <section class="view" id="view-locations">
+      <div class="wrap">
+        <div class="view-head">
+          <div class="eyebrow">Where you climb</div>
+          <h1>Locations</h1>
+          <p>Your most recent spots first. Log straight from any card.</p>
+        </div>
+        <div class="filters">
+          <div class="seg" id="locSeg">
+            <button class="on" data-loct="all">All</button>
+            <button data-loct="gym">Gyms</button>
+            <button data-loct="outdoor">Outdoor</button>
+          </div>
+          <div class="spacer"></div>
+          <span class="crumb" id="locCount"></span>
+        </div>
+        <div class="locgrid" id="locFull"></div>
+        <div class="more-wrap">
+          <button class="btn more-btn" id="btnMore">Show all spots</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TICK LIST ============ -->
+    <section class="view" id="view-ticks">
+      <div class="wrap">
+        <div class="view-head">
+          <div class="eyebrow">Season 2026</div>
+          <h1>All climbs</h1>
+          <p>Every route you've ticked, newest first.</p>
+        </div>
+        <div class="filters">
+          <select id="fLoc" aria-label="Filter by location"><option value="all">All locations</option></select>
+          <select id="fDisc" aria-label="Filter by discipline">
+            <option value="all">Boulder &amp; sport</option>
+            <option value="boulder">Boulder</option>
+            <option value="sport">Sport</option>
+          </select>
+          <select id="fStyle" aria-label="Filter by style">
+            <option value="all">Every style</option>
+            <option value="onsight">Onsight</option>
+            <option value="flash">Flash</option>
+            <option value="redpoint">Redpoint</option>
+            <option value="project">Project</option>
+          </select>
+          <div class="spacer"></div>
+          <span class="crumb" id="tickCount"></span>
+        </div>
+        <div class="panel">
+          <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>Route</th><th>Grade</th><th>Style</th><th>Location</th><th>Tries</th><th>Date</th></tr>
+            </thead>
+            <tbody id="tickBody"></tbody>
+          </table>
+          </div>
+          <div class="empty" id="tickEmpty" style="display:none">
+            <h4>Nothing ticked yet</h4>
+            <p>Log a climb and it lands here with its grade, style and location.</p>
+            <button class="btn btn-primary" onclick="openClimb()" style="margin-top:14px">Log a climb</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ CLIMB MODAL ============ -->
+<div class="veil" id="climbVeil" role="dialog" aria-modal="true" aria-labelledby="climbTitle">
+  <div class="modal">
+    <header>
+      <div>
+        <h3 id="climbTitle">Log a climb</h3>
+        <p id="climbSub">Route, grade, how it went.</p>
+      </div>
+      <button class="x" data-close aria-label="Close">×</button>
+    </header>
+    <div class="form">
+      <div>
+        <div class="label-row">
+          <label for="cLoc">Location</label>
+          <button class="addloc" id="btnAddLoc" type="button">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.2v9.6M3.2 8h9.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            New spot
+          </button>
+        </div>
+        <select id="cLoc"></select>
+      </div>
+      <div>
+        <label for="cName">Route name</label>
+        <input type="text" id="cName" placeholder="e.g. Yellow arête, left start">
+      </div>
+      <div>
+        <label>Discipline</label>
+        <div class="chips" id="cDisc">
+          <button class="chip on" data-v="boulder">Boulder</button>
+          <button class="chip" data-v="sport">Sport</button>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="cGrade">Grade</label>
+          <select id="cGrade"></select>
+        </div>
+        <div>
+          <label for="cTries">Attempts</label>
+          <input type="number" id="cTries" min="1" value="1">
+        </div>
+      </div>
+      <div>
+        <label>How it went</label>
+        <div class="chips" id="cStyle">
+          <button class="chip" data-v="onsight">Onsight</button>
+          <button class="chip on" data-v="flash">Flash</button>
+          <button class="chip" data-v="redpoint">Redpoint</button>
+          <button class="chip" data-v="project">Still projecting</button>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="cDate">Date</label>
+          <input type="date" id="cDate">
+        </div>
+        <div>
+          <label for="cNote">Beta note</label>
+          <input type="text" id="cNote" placeholder="Optional">
+        </div>
+      </div>
+      <div class="err" id="cErr"></div>
+    </div>
+    <footer>
+      <button class="btn" data-close>Cancel</button>
+      <button class="btn btn-primary" id="cSave">Save climb</button>
+    </footer>
+  </div>
+</div>
+
+<!-- ============ LOCATION MODAL ============ -->
+<div class="veil" id="locVeil" role="dialog" aria-modal="true" aria-labelledby="locTitle">
+  <div class="modal">
+    <header>
+      <div>
+        <h3 id="locTitle">Add a location</h3>
+        <p>A gym you train at, or a crag you drive to.</p>
+      </div>
+      <button class="x" data-close aria-label="Close">×</button>
+    </header>
+    <div class="form">
+      <div>
+        <label for="lName">Name</label>
+        <input type="text" id="lName" placeholder="e.g. Blockhaus Boulder">
+      </div>
+      <div class="row">
+        <div>
+          <label>Type</label>
+          <div class="chips" id="lType">
+            <button class="chip on" data-v="gym">Gym</button>
+            <button class="chip" data-v="outdoor">Outdoor</button>
+          </div>
+        </div>
+        <div>
+          <label for="lArea">Area</label>
+          <input type="text" id="lArea" placeholder="City or region">
+        </div>
+      </div>
+      <div>
+        <label for="lRock">Rock or wall type</label>
+        <input type="text" id="lRock" placeholder="e.g. Limestone overhangs, 14 m walls">
+      </div>
+      <div class="err" id="lErr"></div>
+    </div>
+    <footer>
+      <button class="btn" data-close>Cancel</button>
+      <button class="btn btn-primary" id="lSave">Save location</button>
+    </footer>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ data ============ */
+const SCALES = {};
+const BOULDER = ["5","5+","6A","6A+","6B","6B+","6C","6C+","7A","7A+","7B","7B+","7C"];
+const SPORT   = ["5a","5b","5c","6a","6a+","6b","6b+","6c","6c+","7a","7a+","7b","7b+","7c","7c+","8a","8a+","8b"];
+
+SCALES.boulder = BOULDER; SCALES.sport = SPORT;
+
+let locations = [
+  // ---- Indoor: climbing gyms in Slovenia ----
+  {id:"g1",  name:"Plezalni center Ljubljana", type:"gym", area:"Ljubljana · Štepanjsko naselje", rock:"1.580 m², walls to 17 m, ~350 routes + boulder"},
+  {id:"g2",  name:"Bolder Scena",              type:"gym", area:"Ljubljana · Šiška",             rock:"~1.000 m² bouldering, comp-level setting"},
+  {id:"g3",  name:"Balvanija",                 type:"gym", area:"Ljubljana · Vojkova",           rock:"350 m² bouldering, two themed sectors"},
+  {id:"g4",  name:"Plezalni center Rašica",    type:"gym", area:"Ljubljana · Dražgoška",         rock:"Rope walls and boulder"},
+  {id:"g5",  name:"10A Plezalni center",       type:"gym", area:"Ljubljana · Dolgi most",        rock:"Bouldering and training boards"},
+  {id:"g6",  name:"Plezarna",                  type:"gym", area:"Kranj · Britof",                rock:"11 m rope wall, Moonboard, 250 m² cellar boulder"},
+  {id:"g7",  name:"Bolder Scena Kranj",        type:"gym", area:"Kranj",                         rock:"Bouldering, courses and training"},
+  {id:"g8",  name:"Klajmber",                  type:"gym", area:"Maribor · Črtomirova",          rock:"400 m², 160+ boulders, spray wall"},
+  {id:"g9",  name:"Plezalni center Slovenska Bistrica", type:"gym", area:"Slovenska Bistrica",   rock:"Walls 9–17 m, 1.200 m² boulder hall, Kilter + Moonboard"},
+  {id:"g10", name:"Plezalni center Celje",     type:"gym", area:"Celje · I. OŠ Celje",           rock:"883 m², 14 m wall, speed wall, boulder"},
+  {id:"g11", name:"Bolder Baza",               type:"gym", area:"Celje · Vojkova",               rock:"Bouldering centre"},
+  {id:"g12", name:"Plus Climbing",             type:"gym", area:"Koper · Ljubljanska",           rock:"Bouldering, long-standing coastal gym"},
+  {id:"g13", name:"Plezalni center Prevalje",  type:"gym", area:"Prevalje · Polje",              rock:"Rope, speed and rehab walls, boulder"},
+
+  // ---- Outdoor: most popular Slovenian crags ----
+  {id:"c1",  name:"Mišja peč",         type:"outdoor", area:"Osp · Kraški rob",        rock:"~200 overhanging routes, 4a–9a+, stalactites, 7–42 m"},
+  {id:"c2",  name:"Osp (Osapska stena)",type:"outdoor",area:"Osp · Kraški rob",        rock:"~205 routes plus the big cave, climbable year-round"},
+  {id:"c3",  name:"Črni Kal",          type:"outdoor", area:"Kraški rob · 15 min from Koper", rock:"~270 routes, vertical featured slabs, great for beginners"},
+  {id:"c4",  name:"Kotečnik",          type:"outdoor", area:"Posavsko hribovje · Pongrac", rock:"Slovenia's biggest crag, 300+ routes, 4b–8c+, shaded"},
+  {id:"c5",  name:"Čreta",             type:"outdoor", area:"Savinjska",               rock:"~160 routes, forest crag, good in summer heat"},
+  {id:"c6",  name:"Vipava",            type:"outdoor", area:"Vipavska dolina",         rock:"~250 routes, sunny, spring and autumn"},
+  {id:"c7",  name:"Vipavska Bela",     type:"outdoor", area:"Vipavska dolina",         rock:"~120 routes, steep pockets"},
+  {id:"c8",  name:"Bohinjska Bela",    type:"outdoor", area:"Gorenjska · near Bled",   rock:"~80 routes, roadside, family friendly"},
+  {id:"c9",  name:"Bohinj",            type:"outdoor", area:"Gorenjska · Rudnica",     rock:"~90 routes, lakeside limestone"},
+  {id:"c10", name:"Turnc",             type:"outdoor", area:"Gorenjska · Bled",        rock:"~75 routes, the first bolted crag in Slovenia"},
+  {id:"c11", name:"Dolžanova soteska", type:"outdoor", area:"Tržič",                   rock:"~40 routes in a conglomerate gorge"},
+  {id:"c12", name:"Lijak",             type:"outdoor", area:"Goriška",                 rock:"Steep tufa lines, dry in the rain"},
+  {id:"c13", name:"Iški Vintgar",      type:"outdoor", area:"Ljubljana · 40 min",      rock:"~40 routes by the river, shaded in the afternoon"},
+  {id:"c14", name:"Retovje",           type:"outdoor", area:"Vrhnika · 30 min",        rock:"~25 short routes, quick after-work crag"}
+];
+
+const D = n => { const d = new Date(); d.setDate(d.getDate()-n); return d.toISOString().slice(0,10); };
+
+let climbs = [
+  // outdoor — Mišja peč (route names are real classics of the crag)
+  {id:1,  loc:"c1", name:"Rodeo",                 disc:"sport",  grade:"7a",  style:"onsight",  tries:1, date:D(3),  note:"Warm-up for the extension"},
+  {id:2,  loc:"c1", name:"Marjetica",             disc:"sport",  grade:"8b",  style:"project",  tries:4, date:D(3),  note:"Linked from the third bolt"},
+  {id:3,  loc:"c1", name:"Chiquita",              disc:"sport",  grade:"8a",  style:"redpoint", tries:12,date:D(9),  note:"Kneebar rest before the tufa"},
+  {id:4,  loc:"c1", name:"Sonce v očeh",          disc:"sport",  grade:"8a+", style:"project",  tries:7, date:D(9),  note:"Falling at the last hard clip"},
+  // outdoor — Črni Kal
+  {id:5,  loc:"c3", name:"Sektor Ljuba, levi raz",disc:"sport",  grade:"6b",  style:"onsight",  tries:1, date:D(23), note:"Vertical, tiny edges"},
+  {id:6,  loc:"c3", name:"Sektor Ljuba, plat",    disc:"sport",  grade:"6a",  style:"onsight",  tries:1, date:D(23), note:""},
+  // outdoor — Kotečnik
+  {id:7,  loc:"c4", name:"Zahodni greben, prevesek", disc:"sport", grade:"7a+", style:"redpoint", tries:5, date:D(41), note:"Cool in the forest even in July"},
+  {id:8,  loc:"c4", name:"Spodnja stena, rumena", disc:"sport",  grade:"6c",  style:"flash",    tries:1, date:D(41), note:""},
+  // gym — Bolder Scena (boulder)
+  {id:9,  loc:"g2", name:"Rumeni raz",            disc:"boulder",grade:"7A",  style:"redpoint", tries:9, date:D(5),  note:"Heel hook, then a big left cross"},
+  {id:10, loc:"g2", name:"Modra plat, traverz",   disc:"boulder",grade:"6B",  style:"flash",    tries:1, date:D(5),  note:""},
+  {id:11, loc:"g2", name:"Comp set #7",           disc:"boulder",grade:"6C",  style:"flash",    tries:1, date:D(5),  note:""},
+  {id:12, loc:"g2", name:"Rdeči krog, finale",    disc:"boulder",grade:"6C",  style:"redpoint", tries:5, date:D(28), note:""},
+  {id:13, loc:"g2", name:"Dyno problem",          disc:"boulder",grade:"6B",  style:"flash",    tries:1, date:D(28), note:""},
+  {id:14, loc:"g2", name:"Streha v kotu",         disc:"boulder",grade:"7A",  style:"redpoint", tries:12,date:D(34), note:"Skin destroyer"},
+  {id:15, loc:"g2", name:"Sivi previs",           disc:"boulder",grade:"7A+", style:"project",  tries:11,date:D(34), note:"Can link from the second move"},
+  // gym — Plezarna Kranj (boards)
+  {id:16, loc:"g6", name:"Moonboard 2019 b18",    disc:"boulder",grade:"7A",  style:"redpoint", tries:7, date:D(12), note:""},
+  {id:17, loc:"g6", name:"Šutalnica link-up",     disc:"boulder",grade:"6B",  style:"flash",    tries:1, date:D(12), note:""},
+  {id:18, loc:"g6", name:"Klet, dolgi traverz",   disc:"boulder",grade:"6A+", style:"flash",    tries:1, date:D(48), note:""},
+  // gym — Plezalni center Ljubljana (rope)
+  {id:19, loc:"g1", name:"Severna Triglavska, rumena", disc:"sport", grade:"7a+", style:"redpoint", tries:6, date:D(16), note:"Clip from the undercling"},
+  {id:20, loc:"g1", name:"Mali Triglav, plat",    disc:"sport",  grade:"6a",  style:"onsight",  tries:1, date:D(16), note:""},
+  {id:21, loc:"g1", name:"Zunanja stena, hladen start", disc:"sport", grade:"6b+", style:"flash", tries:1, date:D(16), note:""},
+  {id:22, loc:"g1", name:"Zunanja stena, rdeča",  disc:"sport",  grade:"6c+", style:"redpoint", tries:3, date:D(55), note:""}
+];
+
+let uid = 100;
+let disc = "boulder";
+let locFilter = "all";
+let locExpanded = false;
+
+/* ============ helpers ============ */
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const locName = id => (locations.find(l => l.id === id) || {name:"Unknown"}).name;
+const isSend = c => c.style !== "project";
+const scale = d => d === "boulder" ? BOULDER : SPORT;
+const fmt = iso => {
+  const d = new Date(iso + "T00:00:00");
+  const days = Math.round((Date.now() - d) / 86400000);
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < 7) return days + "d ago";
+  return d.toLocaleDateString(undefined, {day:"numeric", month:"short"});
+};
+function toast(msg, accent){
+  const t = $("#toast");
+  t.innerHTML = msg + (accent ? ' <b>' + accent + '</b>' : '');
+  t.classList.add("show");
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+/* ============ render: stats ============ */
+function renderStats(){
+  const sessions = new Set(climbs.map(c => c.date + c.loc)).size;
+  const sends = climbs.filter(isSend);
+  const os = sends.filter(c => c.style === "onsight").length;
+  const projects = climbs.filter(c => c.style === "project");
+
+  $("#sSessions").textContent = sessions;
+  $("#sSends").textContent = sends.length;
+  $("#sSendsNote").textContent = climbs.length + " logged in total";
+  $("#sOnsight").innerHTML = (sends.length ? Math.round(os / sends.length * 100) : 0) + '<small>%</small>';
+  $("#sProjects").textContent = projects.length;
+  $("#sProjNote").textContent = projects.length ? projects.map(p => p.name).slice(0,2).join(", ") : "nothing hanging";
+
+}
+
+/* ============ render: pyramid ============ */
+function renderPyramid(){
+  const box = $("#pyramid");
+  const gs = scale(disc);
+  const mine = climbs.filter(c => c.disc === disc);
+  const counts = gs.map(g => ({
+    g,
+    sends: mine.filter(c => c.grade === g && isSend(c)).length,
+    projs: mine.filter(c => c.grade === g && c.style === "project").length
+  }));
+
+  const top = counts.reduce((acc, c, i) => (c.sends || c.projs) ? i : acc, -1);
+  if (top < 0){
+    box.innerHTML = '<div class="pyr-empty">No ' + disc + ' climbs logged yet. Log one and the pyramid builds itself.</div>';
+    return;
+  }
+  const base = Math.max(0, top - 4);
+  const rows = counts.slice(base, top + 1);
+
+  box.innerHTML = rows.map((r, i) => {
+    // a solid pyramid wants roughly 2× the sends of the grade above it
+    const target = Math.pow(2, rows.length - 1 - i);
+    const gaps = Math.max(0, target - r.sends);
+    const blocks =
+      '<span class="tick"></span>'.repeat(r.sends) +
+      '<span class="tick proj"></span>'.repeat(r.projs) +
+      '<span class="tick ghost"></span>'.repeat(Math.min(gaps, 8));
+    return '<div class="pyr-row">' +
+      '<div class="pyr-grade">' + r.g + '</div>' +
+      '<div class="pyr-track">' + blocks + '</div>' +
+      '<div class="pyr-count">' + r.sends + '</div>' +
+    '</div>';
+  }).join("");
+}
+
+/* ============ render: feed ============ */
+function renderFeed(){
+  const recent = climbs.slice().sort((a,b) => b.date.localeCompare(a.date)).slice(0, 7);
+  $("#feed").innerHTML = recent.map(c =>
+    '<div class="entry">' +
+      '<div class="gbadge' + (c.style === "project" ? " attempt" : "") + '">' + c.grade + '</div>' +
+      '<div>' +
+        '<div class="rt">' + esc(c.name) + '</div>' +
+        '<div class="meta"><span class="pill ' + c.style + '">' + c.style + '</span>' +
+          '<span>' + esc(locName(c.loc)) + '</span>' +
+          (c.tries > 1 ? '<span>· ' + c.tries + ' tries</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="when">' + fmt(c.date) + '</div>' +
+    '</div>'
+  ).join("");
+}
+
+/* ============ render: locations ============ */
+function locCard(l){
+  const mine = climbs.filter(c => c.loc === l.id);
+  const sends = mine.filter(isSend);
+  const hardB = BOULDER.filter(g => sends.some(c => c.grade === g)).slice(-1)[0];
+  const hardS = SPORT.filter(g => sends.some(c => c.grade === g)).slice(-1)[0];
+  const top = [hardB, hardS].filter(Boolean).join(" / ") || "—";
+  return '<article class="loc ' + l.type + '">' +
+    '<div class="type"><b></b>' + (l.type === "gym" ? "Indoor gym" : "Outdoor crag") + '</div>' +
+    '<div><h4>' + esc(l.name) + '</h4><div class="sub">' + esc(l.area || "") + (l.rock ? " · " + esc(l.rock) : "") + '</div></div>' +
+    '<div class="nums">' +
+      '<div>Climbs<b>' + mine.length + '</b></div>' +
+      '<div>Sends<b>' + sends.length + '</b></div>' +
+      '<div>Hardest<b>' + top + '</b></div>' +
+    '</div>' +
+    '<div class="acts">' +
+      '<button class="btn btn-sm btn-primary" onclick="openClimb(\'' + l.id + '\')">Log a climb here</button>' +
+      '<button class="btn btn-sm" onclick="showTicksFor(\'' + l.id + '\')">View climbs</button>' +
+    '</div>' +
+  '</article>';
+}
+function lastClimbAt(id){
+  const d = climbs.filter(c => c.loc === id).map(c => c.date).sort();
+  return d.length ? d[d.length - 1] : "";
+}
+function renderLocations(){
+  const list = locations
+    .filter(l => locFilter === "all" || l.type === locFilter)
+    .sort((a,b) => lastClimbAt(b.id).localeCompare(lastClimbAt(a.id)) || a.name.localeCompare(b.name));
+
+  const shown = locExpanded ? list : list.slice(0, 3);
+  $("#locCount").textContent = list.length + (list.length === 1 ? " spot" : " spots");
+  $("#locFull").innerHTML = shown.length
+    ? shown.map(l => locCard(l)).join("")
+    : '<div class="empty"><h4>No spots of this type</h4><p>Add one from the Log a climb form.</p></div>';
+
+  const hidden = list.length - shown.length;
+  const btn = $("#btnMore");
+  btn.style.display = (list.length > 3) ? "inline-flex" : "none";
+  btn.textContent = locExpanded ? "Show fewer" : "Show all " + list.length + " spots";
+}
+
+/* ============ render: tick list ============ */
+function renderTicks(){
+  const fl = $("#fLoc").value, fd = $("#fDisc").value, fs = $("#fStyle").value;
+  const rows = climbs
+    .filter(c => (fl === "all" || c.loc === fl) && (fd === "all" || c.disc === fd) && (fs === "all" || c.style === fs))
+    .sort((a,b) => b.date.localeCompare(a.date));
+
+  $("#tickCount").textContent = rows.length + " of " + climbs.length + " climbs";
+  $("#tickEmpty").style.display = rows.length ? "none" : "block";
+  $("#tickBody").innerHTML = rows.map(c =>
+    '<tr>' +
+      '<td><strong>' + esc(c.name) + '</strong>' + (c.note ? '<div class="crumb">' + esc(c.note) + '</div>' : '') + '</td>' +
+      '<td class="g">' + c.grade + '</td>' +
+      '<td><span class="pill ' + c.style + '">' + c.style + '</span></td>' +
+      '<td>' + esc(locName(c.loc)) + '</td>' +
+      '<td class="g">' + c.tries + '</td>' +
+      '<td class="when">' + new Date(c.date + "T00:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short",year:"2-digit"}) + '</td>' +
+    '</tr>'
+  ).join("");
+}
+
+function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+
+function renderLocOptions(){
+  const opts = locations.map(l => '<option value="' + l.id + '">' + esc(l.name) + '</option>').join("");
+  $("#cLoc").innerHTML = opts;
+  const keep = $("#fLoc").value;
+  $("#fLoc").innerHTML = '<option value="all">All locations</option>' + opts;
+  $("#fLoc").value = locations.some(l => l.id === keep) ? keep : "all";
+}
+
+function renderHero(){
+  const mine  = climbs.slice().sort((a,b) => b.date.localeCompare(a.date));
+  const sends = mine.filter(isSend);
+
+  // hardest send in each discipline, read straight off the log
+  const best = (d) => {
+    const list = SCALES[d].slice().reverse();
+    const g = list.find(x => sends.some(c => c.disc === d && c.grade === x));
+    const r = g && sends.filter(c => c.disc === d && c.grade === g).sort((a,b) => b.date.localeCompare(a.date))[0];
+    return {g, r};
+  };
+  [["sport","#bestSport"],["boulder","#bestBoulder"]].forEach(([d, sel]) => {
+    const {g, r} = best(d);
+    const box = $(sel);
+    box.querySelector(".g").textContent = g || "—";
+    box.querySelector(".r").textContent = r ? r.name + " · " + locName(r.loc) : "nothing sent yet";
+  });
+
+  const words = ["No","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve"];
+  const sessions = new Set(climbs.map(c => c.date + c.loc)).size;
+
+  $("#heroEyebrow").textContent = "Welcome back, Marcel";
+
+  // the top grade you've sent in, and how far its layer is from a solid pyramid
+  const gs = SCALES[disc];
+  const counts = gs.map(g => sends.filter(c => c.disc === disc && c.grade === g).length);
+  const top = counts.reduce((acc, n, i) => n ? i : acc, -1);
+
+  if (top < 0){
+    $("#heroLine").innerHTML = "Nothing logged yet. The <em>pyramid</em> starts with one climb.";
+  } else {
+    const gap = Math.max(0, 2 - counts[top]);   // a solid layer wants at least two sends
+    const need = gap === 0 ? "is solid" : gap === 1 ? "is one send from solid" : "is " + words[gap].toLowerCase() + " sends from solid";
+    $("#heroLine").innerHTML = (words[sessions] || sessions) + " session" + (sessions === 1 ? "" : "s")
+      + " in. The <em>" + gs[top] + " pyramid</em> " + need + ".";
+  }
+  $("#heroSub").textContent = "Every route you log feeds the pyramid below. Broad base, honest middle — that's how the next grade stops feeling like luck.";
+}
+
+function renderAll(){ renderHero(); renderStats(); renderPyramid(); renderFeed(); renderLocations(); renderTicks(); }
+
+/* ============ navigation ============ */
+function go(view){
+  const el = $("#view-" + view);
+  if (el) el.scrollIntoView({behavior:"smooth", block:"start"});
+}
+$$("[data-goto]").forEach(b => b.onclick = () => go(b.dataset.goto));
+function showTicksFor(id){ $("#fLoc").value = id; renderTicks(); go("ticks"); }
+
+$("#discSeg").onclick = e => {
+  const b = e.target.closest("button"); if(!b) return;
+  disc = b.dataset.disc;
+  $$("#discSeg button").forEach(x => x.classList.toggle("on", x === b));
+  renderPyramid(); renderStats(); renderHero();
+};
+$("#locSeg").onclick = e => {
+  const b = e.target.closest("button"); if(!b) return;
+  locFilter = b.dataset.loct;
+  locExpanded = false;
+  $$("#locSeg button").forEach(x => x.classList.toggle("on", x === b));
+  renderLocations();
+};
+["fLoc","fDisc","fStyle"].forEach(id => $("#" + id).onchange = renderTicks);
+
+/* ============ modals ============ */
+function chipGroup(sel){
+  const el = $(sel);
+  el.onclick = e => {
+    const b = e.target.closest(".chip"); if(!b) return;
+    [...el.children].forEach(c => c.classList.toggle("on", c === b));
+    if (sel === "#cDisc") fillGrades();
+  };
+  return () => (el.querySelector(".chip.on") || {}).dataset?.v;
+}
+const getDisc  = chipGroup("#cDisc");
+const getStyle = chipGroup("#cStyle");
+const getLType = chipGroup("#lType");
+
+function fillGrades(){
+  const gs = scale(getDisc());
+  $("#cGrade").innerHTML = gs.map(g => '<option>' + g + '</option>').join("");
+  $("#cGrade").value = gs[Math.min(5, gs.length - 1)];
+}
+
+function openClimb(locId){
+  $("#cErr").textContent = "";
+  $("#cName").value = "";
+  $("#cNote").value = "";
+  $("#cTries").value = 1;
+  $("#cDate").value = new Date().toISOString().slice(0,10);
+  fillGrades();
+  if (locId) $("#cLoc").value = locId;
+  $("#climbSub").textContent = locId ? "At " + locName(locId) + "." : "Route, grade, how it went.";
+  $("#climbVeil").classList.add("open");
+  setTimeout(() => $("#cName").focus(), 40);
+}
+let returnToClimb = false;
+function openLoc(fromClimb){
+  returnToClimb = !!fromClimb;
+  $("#lErr").textContent = "";
+  ["lName","lArea","lRock"].forEach(i => $("#" + i).value = "");
+  if (fromClimb) $("#climbVeil").classList.remove("open");
+  $("#locVeil").classList.add("open");
+  setTimeout(() => $("#lName").focus(), 40);
+}
+$("#btnAddClimb").onclick = () => openClimb();
+$("#btnAddLoc").onclick = () => openLoc(true);
+$$("[data-close]").forEach(b => b.onclick = () => {
+  const v = b.closest(".veil");
+  v.classList.remove("open");
+  if (v.id === "locVeil" && returnToClimb){ returnToClimb = false; $("#climbVeil").classList.add("open"); }
+});
+$$(".veil").forEach(v => v.onclick = e => { if (e.target === v){ v.classList.remove("open"); returnToClimb = false; } });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape"){ $$(".veil").forEach(v => v.classList.remove("open")); returnToClimb = false; }
+});
+
+$("#cSave").onclick = () => {
+  const name = $("#cName").value.trim();
+  if (!name){ $("#cErr").textContent = "Give the route a name — even 'blue circuit #4' works."; $("#cName").focus(); return; }
+  const style = getStyle();
+  const tries = Math.max(1, parseInt($("#cTries").value) || 1);
+  climbs.push({
+    id: ++uid,
+    loc: $("#cLoc").value,
+    name,
+    disc: getDisc(),
+    grade: $("#cGrade").value,
+    style,
+    tries: style === "onsight" || style === "flash" ? 1 : tries,
+    date: $("#cDate").value || new Date().toISOString().slice(0,10),
+    note: $("#cNote").value.trim()
+  });
+  $("#climbVeil").classList.remove("open");
+  renderAll();
+  toast(style === "project" ? "Project logged" : "Sent", $("#cGrade").value + " · " + name);
+};
+
+$("#lSave").onclick = () => {
+  const name = $("#lName").value.trim();
+  if (!name){ $("#lErr").textContent = "Name the spot so you can find it later."; $("#lName").focus(); return; }
+  const id = "l" + (++uid);
+  locations.push({id, name, type: getLType(), area: $("#lArea").value.trim(), rock: $("#lRock").value.trim()});
+  $("#locVeil").classList.remove("open");
+  renderLocOptions();
+  renderAll();
+  if (returnToClimb){
+    returnToClimb = false;
+    $("#cLoc").value = id;
+    $("#climbSub").textContent = "At " + name + ".";
+    $("#climbVeil").classList.add("open");
+    setTimeout(() => $("#cName").focus(), 40);
+  } else {
+    go("locations");
+  }
+  toast("Location added", name);
+};
+
+
+/* ============ login (demo only — no real auth, everything runs in the browser) ============ */
+const ACCOUNT = {user:"marcel", pass:"12345"};
+
+// the password box shows one * per character while the real value is kept here
+let passValue = "";
+(function maskPassword(){
+  const el = $("#gPass");
+  el.addEventListener("input", () => {
+    const shown = el.value;
+    const pos   = el.selectionStart;
+    const diff  = shown.length - passValue.length;
+    if (diff > 0){
+      const at = pos - diff;
+      passValue = passValue.slice(0, at) + shown.substr(at, diff) + passValue.slice(at);
+    } else if (diff < 0){
+      passValue = passValue.slice(0, pos) + passValue.slice(pos - diff);
+    }
+    el.value = "*".repeat(passValue.length);
+    el.setSelectionRange(pos, pos);
+  });
+})();
+function signIn(){
+  const u = $("#gUser").value.trim().toLowerCase();
+  const p = passValue;
+  if (!u || !p){ $("#gErr").textContent = "Enter your name and password."; return; }
+  if (u !== ACCOUNT.user || p !== ACCOUNT.pass){
+    $("#gErr").textContent = "That name and password don't match.";
+    $("#gPass").value = ""; passValue = ""; $("#gPass").focus();
+    return;
+  }
+  $("#gate").classList.add("done");
+  document.body.classList.remove("locked");
+}
+$("#gGo").onclick = signIn;
+["gUser","gPass"].forEach(id => $("#" + id).addEventListener("keydown", e => {
+  if (e.key === "Enter") signIn();
+  else $("#gErr").textContent = "";
+}));
+document.body.classList.add("locked");
+setTimeout(() => $("#gUser").focus(), 60);
+
+/* ============ boot ============ */
+$("#btnMore").onclick = () => { locExpanded = !locExpanded; renderLocations(); };
+
+renderLocOptions();
+fillGrades();
+renderAll();
+</script>
+</body>
+</html>
